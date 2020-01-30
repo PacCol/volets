@@ -9,12 +9,12 @@ from flask import request
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/volets/status', methods=['GET'])
-def get_status():
-    status_file = open("status.txt","r")
-    status = status_file.read()
-    status_file.close()
-    return jsonify({'status':status})
+@app.route('/volets/infos', methods=['GET'])
+def get_infos():
+    fichier_heure = open("heure.txt","r")
+    heures = fichier_heure.read()
+    fichier_heure.close()
+    return jsonify({'infos':'gg'})
 
 @app.route('/volets/status', methods=['POST'])
 def set_status():
@@ -30,17 +30,15 @@ def set_status():
 
     if action == "ouvrir":
         print("ouverture")
-        status_file = open("status.txt","w")
-        status_file.write("ouvert")
-        status_file.close()
+        return jsonify({'status':'ouvert'})
 
     elif action == "fermer":
         print("fermeture")
-        status_file = open("status.txt","w")
-        status_file.write("fermer")
-        status_file.close()
-    
-    status_file = open("status.txt","r")
-    status = status_file.read()
-    status_file.close()
-    return jsonify({'status':status})
+        return jsonify({'status':'ferme'})
+
+    elif "programmer_false" in action:
+        print("programmation")
+        fichier_heure = open("heure.txt","w")
+        fichier_heure.write("heure:desactivated")
+        fichier_heure.close()
+        return jsonify({'status':'updated'})

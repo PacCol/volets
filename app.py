@@ -5,16 +5,11 @@ from flask import make_response
 from flask import abort
 from flask import request
 
+from ouverture import *
+
 @app.errorhandler(404)
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
-
-@app.route('/volets/infos', methods=['GET'])
-def get_infos():
-    fichier_heure = open("heure.txt","r")
-    heures = fichier_heure.read()
-    fichier_heure.close()
-    return jsonify({'infos':'gg'})
 
 @app.route('/volets/status', methods=['POST'])
 def set_status():
@@ -29,16 +24,28 @@ def set_status():
     action = request.json['action']
 
     if action == "ouvrir":
-        print("ouverture")
+        ouvrir()
         return jsonify({'status':'ouvert'})
 
     elif action == "fermer":
-        print("fermeture")
+        fermer()
         return jsonify({'status':'ferme'})
 
     elif "programmer_false" in action:
-        print("programmation")
         fichier_heure = open("heure.txt","w")
         fichier_heure.write("heure:desactivated")
+        fichier_heure.close()
+        return jsonify({'status':'updated'})
+
+    elif "programmer_true" in action:
+        heure_ouverture = action.split("(")[1].split(",")[0]
+        minute_ouverture = action.split("(")[1].split(",")[1]
+        heure_fermeture = action.split("(")[1].split(",")[2]
+        minute_fermeture = action.split("(")[1].split(",")[3].split(")")[0]
+        if minute_fermeture == "0":
+            minute_fermeture = "00"
+        heure = heure_ouverture + ":" + minute_ouverture + "|" + heure_fermeture + ":" + minute_fermeture
+        fichier_heure = open("heure.txt","w")
+        fichier_heure.write(heure)
         fichier_heure.close()
         return jsonify({'status':'updated'})

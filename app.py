@@ -1,3 +1,13 @@
+from threading import Thread
+import os
+
+def start_hour_thread():
+    os.chdir("/home/pi/volets/")
+    os.system("python3 heure.py")
+
+t = Thread(target=start_hour_thread)
+t.start()
+
 from flask import Flask, jsonify
 app = Flask(__name__)
 
@@ -23,21 +33,21 @@ def set_status():
 
     action = request.json['action']
 
-    if action == "ouvrir":
+    if action == "open":
         ouvrir()
-        return jsonify({'status':'ouvert'})
+        return jsonify({'status':'opened'})
 
-    elif action == "fermer":
+    elif action == "close":
         fermer()
-        return jsonify({'status':'ferme'})
-
-    elif "programmer_false" in action:
+        return jsonify({'status':'closed'})
+    
+    elif "set_hour_false" in action:
         fichier_heure = open("heure.txt","w")
         fichier_heure.write("heure:desactivated")
         fichier_heure.close()
         return jsonify({'status':'updated'})
 
-    elif "programmer_true" in action:
+    elif "set_hour_true" in action:
         heure_ouverture = action.split("(")[1].split(",")[0]
         minute_ouverture = action.split("(")[1].split(",")[1]
         heure_fermeture = action.split("(")[1].split(",")[2]
@@ -47,5 +57,11 @@ def set_status():
         heure = heure_ouverture + ":" + minute_ouverture + "|" + heure_fermeture + ":" + minute_fermeture
         fichier_heure = open("heure.txt","w")
         fichier_heure.write(heure)
+        fichier_heure.close()
+        return jsonify({'status':'updated'})
+    
+    elif action == "set_hour_sunrise_sunset":
+        fichier_heure = open("heure.txt","w")
+        fichier_heure.write("heure:sunset_sunrise")
         fichier_heure.close()
         return jsonify({'status':'updated'})
